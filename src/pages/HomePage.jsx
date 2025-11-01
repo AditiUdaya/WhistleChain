@@ -23,21 +23,21 @@ const HomePage = () => {
         <div className="hero-buttons">
           <button 
             className="btn-primary" 
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/submit')}
           >
             Submit Leak
           </button>
           <button 
             className="btn-secondary" 
-            onClick={() => navigate('/verification')}
+            onClick={() => navigate('/chat')}  //to add messaging chat page later
           >
-            Verify Leak
+            Message
           </button>
           <button 
             className="btn-tertiary"
             onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })}
           >
-            About Platform
+            Visualization
           </button>
         </div>
       </header>
@@ -63,7 +63,7 @@ const HomePage = () => {
             className={activeDemo === 'steganography' ? 'tab active' : 'tab'}
             onClick={() => setActiveDemo('steganography')}
           >
-            Steganography (Optional)
+            Steganography 
           </button>
         </div>
 
