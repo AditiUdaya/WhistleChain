@@ -1,0 +1,29 @@
+{
+  "name": "pqc-secure-messaging",
+  "version": "1.0.0",
+  "description": "Post-Quantum Cryptography Secure Messaging System with ML-KEM768 and ML-DSA65",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node client.js"
+  },
+  "keywords": [
+    "pqc",
+    "post-quantum",
+    "kyber",
+    "ml-kem768",
+    "ml-dsa65",
+    "cryptography",
+    "secure-messaging"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@noble/post-quantum": "^0.8.0"
+  },
+  "devDependencies": {}
+}
