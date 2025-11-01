@@ -1,0 +1,20 @@
+{
+  "name": "pqc-messaging",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@noble/post-quantum": "^0.5.2",
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "web3": "^4.16.0"
+  }
+}
