@@ -35,7 +35,7 @@ const HomePage = () => {
           </button>
           <button 
             className="btn-tertiary"
-            onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => navigate('/visualization')}
           >
             Visualization
           </button>

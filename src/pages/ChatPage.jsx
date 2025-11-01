@@ -1,4 +1,4 @@
-// src/pages/ChatPage.jsx - PRODUCTION VERSION WITH REAL MESSAGING
+// src/pages/ChatPage.jsx - WITH REAL DECRYPTION
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatPage.css';
 
@@ -12,17 +12,14 @@ const ChatPage = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [pollInterval, setPollInterval] = useState(null);
   const messagesEndRef = useRef(null);
 
   const BASE_URL = 'http://localhost:3001/api';
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initialize user
   const handleInitialize = async () => {
     if (!userId.trim()) {
       setError('Please enter a username');
@@ -44,31 +41,24 @@ const ChatPage = () => {
       if (data.success) {
         setCurrentUser(userId.trim());
         setIsInitialized(true);
-        
-        // Fetch users
         await fetchUsers();
-        
-        // Auto-select "alice" or "bob" as recipient
         const otherUser = userId.trim() === 'alice' ? 'bob' : 'alice';
         setRecipientId(otherUser);
       } else {
         setError(data.error || 'Initialization failed');
       }
     } catch (err) {
-      setError('Cannot connect to server. Make sure backend is running on http://localhost:3001');
+      setError('Cannot connect to server on http://localhost:3001');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch all users
   const fetchUsers = async () => {
     try {
       const response = await fetch(`${BASE_URL}/users`);
       const data = await response.json();
-      
       if (data.success) {
-        // Get all users including current user for recipient selection
         setUsers(data.users);
       }
     } catch (err) {
@@ -76,23 +66,22 @@ const ChatPage = () => {
     }
   };
 
-  // Fetch messages and auto-decrypt
+  // Fetch and decrypt messages
   const fetchMessages = async () => {
     try {
       const response = await fetch(`${BASE_URL}/messages`);
       const data = await response.json();
-      
+
       if (data.success && data.messages) {
-        // Filter relevant messages for current conversation
+        // Filter conversation messages
         const conversationMessages = data.messages.filter(msg =>
           (msg.senderId === currentUser && msg.recipientId === recipientId) ||
           (msg.senderId === recipientId && msg.recipientId === currentUser)
         );
 
-        // Decrypt received messages
-        const decryptedMessages = await Promise.all(
+        // Auto-decrypt received messages
+        const processedMessages = await Promise.all(
           conversationMessages.map(async (msg) => {
-            // If received and not decrypted yet
             if (msg.recipientId === currentUser && !msg.decryptedContent) {
               try {
                 const decryptResponse = await fetch(`${BASE_URL}/receive`, {
@@ -109,7 +98,8 @@ const ChatPage = () => {
                   return {
                     ...msg,
                     decryptedContent: decryptData.content,
-                    authenticated: decryptData.authenticated
+                    authenticated: decryptData.authenticated,
+                    signatureVerified: decryptData.signatureVerified
                   };
                 }
               } catch (err) {
@@ -120,31 +110,25 @@ const ChatPage = () => {
           })
         );
 
-        setMessages(decryptedMessages);
+        setMessages(processedMessages);
       }
     } catch (err) {
       console.error('Error fetching messages:', err);
     }
   };
 
-  // Start polling when user and recipient are set
+  // Poll for messages
   useEffect(() => {
     if (isInitialized && currentUser && recipientId) {
-      // Fetch immediately
       fetchMessages();
-      
-      // Then poll every 2 seconds
       const interval = setInterval(fetchMessages, 2000);
-      setPollInterval(interval);
-      
       return () => clearInterval(interval);
     }
   }, [isInitialized, currentUser, recipientId]);
 
-  // Send message
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    
+
     if (!message.trim() || !recipientId) {
       setError('Please enter a message and select a recipient');
       return;
@@ -168,8 +152,6 @@ const ChatPage = () => {
 
       if (data.success) {
         setMessage('');
-        
-        // Fetch updated messages
         await fetchMessages();
       } else {
         setError(data.error || 'Failed to send message');
@@ -181,11 +163,10 @@ const ChatPage = () => {
     }
   };
 
-  // Change recipient
   const handleSelectUser = (userId) => {
     if (userId !== currentUser) {
       setRecipientId(userId);
-      setMessages([]); // Clear messages when switching recipient
+      setMessages([]);
     }
   };
 
@@ -196,7 +177,7 @@ const ChatPage = () => {
           <div className="init-card">
             <h1>🔐 WhistleChain Secure Chat</h1>
             <p className="init-subtitle">Post-Quantum Encrypted User-to-User Messaging</p>
-            
+
             <div className="security-info">
               <div className="security-badge">
                 <span className="badge-icon">🔑</span>
@@ -217,22 +198,22 @@ const ChatPage = () => {
             <div className="init-form">
               <label className="form-label">Choose your username:</label>
               <div className="button-group">
-                <button 
+                <button
                   onClick={() => setUserId('alice')}
                   className={`user-button ${userId === 'alice' ? 'active' : ''}`}
                 >
-                  👤 Alice
+                  👩 Alice
                 </button>
-                <button 
+                <button
                   onClick={() => setUserId('bob')}
                   className={`user-button ${userId === 'bob' ? 'active' : ''}`}
                 >
-                  👤 Bob
+                  👨 Bob
                 </button>
               </div>
 
               {userId && (
-                <button 
+                <button
                   onClick={handleInitialize}
                   disabled={loading}
                   className="init-button"
@@ -246,10 +227,10 @@ const ChatPage = () => {
               <h3>📋 How It Works:</h3>
               <ul>
                 <li>✅ Select Alice or Bob</li>
-                <li>✅ Quantum-resistant keypairs generated</li>
-                <li>✅ Messages encrypted end-to-end</li>
-                <li>✅ Digitally signed for authenticity</li>
-                <li>✅ Open second browser tab with other user</li>
+                <li>✅ Messages encrypted with EC keypairs</li>
+                <li>✅ Signed with RSA for authenticity</li>
+                <li>✅ Auto-decrypts when received</li>
+                <li>✅ Signature verified automatically</li>
               </ul>
             </div>
           </div>
@@ -267,7 +248,7 @@ const ChatPage = () => {
         </div>
         <div className="header-right">
           <span className="status-indicator">🟢 Connected</span>
-          <button 
+          <button
             className="logout-btn"
             onClick={() => {
               setIsInitialized(false);
@@ -283,7 +264,6 @@ const ChatPage = () => {
       </div>
 
       <div className="chat-layout">
-        {/* Users Sidebar */}
         <div className="users-sidebar">
           <h3>📋 Users Online</h3>
           <div className="users-list">
@@ -305,20 +285,14 @@ const ChatPage = () => {
                 </div>
               </div>
             ))}
-            {users.length === 0 && (
-              <div className="no-users">
-                <p>No users found</p>
-              </div>
-            )}
           </div>
 
           <div className="sidebar-info">
             <h4>💡 Tip:</h4>
-            <p>Open another browser tab and login as {currentUser === 'alice' ? 'Bob' : 'Alice'} to start chatting!</p>
+            <p>Open another browser tab and login as {currentUser === 'alice' ? 'Bob' : 'Alice'} to chat!</p>
           </div>
         </div>
 
-        {/* Chat Area */}
         <div className="chat-main">
           {recipientId && recipientId !== currentUser ? (
             <>
@@ -355,6 +329,9 @@ const ChatPage = () => {
                           {msg.authenticated && msg.senderId !== currentUser && (
                             <span className="verified-badge">✅ Verified</span>
                           )}
+                          {msg.signatureVerified && msg.senderId !== currentUser && (
+                            <span className="signature-badge">🔏 Signed</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -373,7 +350,7 @@ const ChatPage = () => {
                   className="message-input"
                   disabled={loading}
                 />
-                <button 
+                <button
                   type="submit"
                   className="send-btn"
                   disabled={loading || !message.trim()}
