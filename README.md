@@ -69,4 +69,19 @@ WhistleChain redefines digital whistleblowing by ensuring:
 
 WhistleChain empowers whistleblowers to share critical truths safely — even in a post-quantum world.
 
+## Branch Organisation
+
+| Branch | Description |
+|---------|-------------|
+| **full-stack** | Contains the complete project with blockchain integration, PQC encryption, and frontend. |
+| **blockchain** | Includes scripts to test Polygon Amoy connection and verify transaction functionality. |
+| **images** | Contains screenshots and visual references of the application. |
+| **pqc** | Scripts for testing and verifying post-quantum encryption (Kyber, Dilithium) and simple message exchange. |
+| **pqc-messaging** | Implements hybrid AES + PQC encryption for secure messaging (backend only). |
+| **frontend-ui** | Contains only the frontend user interface without any integration. |
+| **frontend-integrated** | Contains frontend pages integrated with backend links and APIs. |
+
+---
+
+
 
